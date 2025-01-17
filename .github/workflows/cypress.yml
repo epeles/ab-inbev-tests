@@ -25,11 +25,13 @@ jobs:
       - name: Install dependencies
         run: npm i
 
+      - name: Install Cypress
+        run: npx cypress install
+
       - name: Run Cypress Tests
         run: |
           npx cypress run \
-            --parallel \
-            --group "browser-${{ matrix.browser }}" \
+
             --browser ${{ matrix.browser }} 
 
       - name: Upload test results
