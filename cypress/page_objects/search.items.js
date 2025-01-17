@@ -10,6 +10,18 @@ class SearchItem {
     item() {
         return 'generic';
     }
+
+    addToListBtn() {
+        cy.get('[data-testid="adicionarNaLista"]').first().click();
+    }
+
+    addToCartBtn() {
+        cy.get('[data-testid="adicionar carrinho"]').click();
+    }
+
+    increaseQuantity() {
+        cy.get('[data-testid="product-increase-quantity"]').click();
+    }
 }
 
 
