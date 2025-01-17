@@ -31,6 +31,10 @@ jobs:
       - name: Run Cypress Tests
         run: |
           npx cypress run \
+            --record \
+            --key eec2f54c-de1d-4cdf-9efa-bcf45a7fc51c \
+            --parallel \
+            --group "browser-${{ matrix.browser }}" \
             --browser ${{ matrix.browser }} 
 
       - name: Upload test results
