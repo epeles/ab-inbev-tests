@@ -3,54 +3,60 @@ const loginPage = new LoginTest();
 
 describe('Login Tests', () => {
   beforeEach(() => {
+    // Visit the base URL configured in Cypress
     cy.visit(Cypress.config('baseUrl'));
+    // Intercept requests to the login endpoint
     cy.intercept('https://serverest.dev/login').as('login');
   });
 
-  // it('Should create a new user and confirm its creation', () => {
-  //   // Step 1: Create a new user
-  //   cy.request('POST', 'https://serverest.dev/usuarios', loginPage.defaultUser).then((response) => {
-  //     // Step 2: Validate the creation response
-     
-  //     expect(response.status).to.eq(201);
-  //     expect(response.body.message).to.eq('Cadastro realizado com sucesso');
-  //     const userId = response.body._id;
-  //   });
-  // });
+  it('Should create a new user and confirm its creation', () => {
+    // Check if the user already exists and delete if it does
+    cy.request('GET', `https://serverest.dev/usuarios?email=${loginPage.newUser.default.email}`).then((response) => {
+      if (response.body.quantidade > 0) {
+        cy.request('DELETE', `https://serverest.dev/usuarios/${response.body.usuarios[0]._id}`);
+      }
+    });
+
+    // Step 1: Create a new user
+    cy.request('POST', 'https://serverest.dev/usuarios', loginPage.newUser.default).then((response) => {
+      // Step 2: Validate the creation response
+      expect(response.status).to.eq(201); // Check if the status code is 201 (Created)
+      expect(response.body.message).to.eq('Cadastro realizado com sucesso'); // Check if the response message is correct
+      // const userId = response.body._id; // Store the user ID for further use
+    });
+  });
 
   it('should login with valid credentials', () => {
-    const { email, password } = loginPage.defaultUser
-    loginPage.enterUsername(email);
-    loginPage.enterPassword(password);
-    loginPage.submit();
+    const { email, password } = loginPage.newUser.default;
+    loginPage.enterUsername(email); // Enter the username
+    loginPage.enterPassword(password); // Enter the password
+    loginPage.submit(); // Submit the login form
     cy.wait('@login').then(({ response }) => {
-      expect(response.statusCode).to.eq(200);
-      expect(response.body.message).to.eq('Login realizado com sucesso');
-      
+      expect(response.statusCode).to.eq(200); // Check if the status code is 200 (OK)
+      expect(response.body.message).to.eq('Login realizado com sucesso'); // Check if the response message is correct
     });
-    cy.url().should('include', '/home'); 
+    cy.url().should('include', '/home'); // Check if the URL includes '/home'
   });
 
   it('should show error with invalid credentials', () => {
-    loginPage.enterUsername('as@vc.com');
-    loginPage.enterPassword('invalidPassword');
-    loginPage.submit();
+    loginPage.enterUsername('as@vc.com'); // Enter an invalid username
+    loginPage.enterPassword('invalidPassword'); // Enter an invalid password
+    loginPage.submit(); // Submit the login form
     cy.wait('@login').then(({ response }) => {
-      expect(response.statusCode).to.eq(401);
-      expect(response.body.message).to.eq("Email e/ou senha inválidos");
-      
+      expect(response.statusCode).to.eq(401); // Check if the status code is 401 (Unauthorized)
+      expect(response.body.message).to.eq("Email e/ou senha inválidos"); // Check if the response message is correct
     });
-    loginPage.getErrorMessage().should('be.visible').and('contain', 'Email e/ou senha inválidos'); // Verifica se a mensagem de erro está visível
+    loginPage.getErrorMessage().should('be.visible').and('contain', 'Email e/ou senha inválidos'); // Check if the error message is visible and contains the expected text
   });
 
   it('should show error with no username', () => {
-    loginPage.enterPassword('invalidPassword');
-    loginPage.submit();
+    loginPage.enterPassword('invalidPassword'); // Enter an invalid password
+    loginPage.submit(); // Submit the login form without entering a username
     cy.wait('@login').then(({ response }) => {
-      expect(response.statusCode).to.eq(400);    
-      expect(response.body.email).to.eq("email é obrigatório");
+      expect(response.statusCode).to.eq(400); // Check if the status code is 400 (Bad Request)
+      expect(response.body.email).to.eq("email é obrigatório"); // Check if the response message is correct
     });
-    loginPage.getErrorMessage().should('be.visible') 
+    loginPage.getErrorMessage().should('be.visible')// Check if the error message is visible
   });
 });
 

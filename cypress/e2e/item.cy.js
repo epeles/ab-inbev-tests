@@ -6,7 +6,7 @@ const searchItem = new SearchItem();
 describe('Item Search Tests', () => {
   beforeEach(() => {
     cy.visit(Cypress.config('baseUrl'));
-    const { email, password } = loginPage.defaultUser
+    const { email, password } = loginPage.newUser.default
     loginPage.enterUsername(email);
     loginPage.enterPassword(password);
     loginPage.submit();

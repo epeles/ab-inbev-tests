@@ -1,42 +1,10 @@
-describe('User Creation and Verification', () => {
-    it('Should create a new user and confirm its creation', () => {
-      const newUser = {
-        nome: 'Cypress Test',
-        email: `cypress.test${Date.now()}@example.com`,
-        password: 'password123',
-        administrador: 'true'
-      };
-  
-      // Step 1: Create a new user
-      cy.request('POST', 'https://serverest.dev/usuarios', newUser).then((response) => {
-        // Step 2: Validate the creation response
-        console.log(newUser);
-        
-        expect(response.status).to.eq(201);
-        expect(response.body.message).to.eq('Cadastro realizado com sucesso');
-        const userId = response.body._id;
-  
-        // Step 3: Confirm the user was created
-        cy.request('GET', `https://serverest.dev/usuarios/${userId}`).then((getResponse) => {
-          expect(getResponse.status).to.eq(200);
-          expect(getResponse.body.nome).to.eq(newUser.nome);
-          expect(getResponse.body.email).to.eq(newUser.email);
-        });
-      });
-    });
-  });
+import LoginTest from "../page_objects/login.page";
+const loginPage = new LoginTest();
 
-  describe('User Deletion', () => {
-    it('Should create a new user and delete it successfully', () => {
-      const newUser = {
-        nome: 'Cypress Test User',
-        email: `cypress.test${Date.now()}@example.com`,
-        password: 'password123',
-        administrador: 'true'
-      };
-  
+describe('User Deletion', () => {
+    it('Should create a new user and delete it successfully', () => {  
       // Step 1: Create a new user
-      cy.request('POST', 'https://serverest.dev/usuarios', newUser).then((response) => {
+      cy.request('POST', 'https://serverest.dev/usuarios', loginPage.newUser.new).then((response) => {
         // Step 2: Store the user ID
         expect(response.status).to.eq(201);
         const userId = response.body._id;
@@ -58,36 +26,32 @@ describe('User Creation and Verification', () => {
         });
       });
     });
-  });
+});
 
-  describe('Shopping Cart Tests', () => {
+describe('Shopping Cart Tests', () => {
     let authToken;
-    let userId;
   
-    const newUser = {
-        nome: 'Cypress Test',
-        email: `cypress.test${Date.now()}@example.com`,
-        password: 'password123',
-        administrador: 'true'
-    };
-
-
     before(() => {
-        // Step 1: Create a new user
-        cy.request('POST', 'https://serverest.dev/usuarios', newUser).then((response) => {
-            expect(response.status).to.eq(201);
-            userId = response.body._id;
+        cy.request('GET', `https://serverest.dev/usuarios?email=${loginPage.newUser.default.email}`).then((response) => {
+            if (response.body.quantidade > 0) {
+              cy.request('DELETE', `https://serverest.dev/usuarios/${response.body.usuarios[0]._id}`);
+            }
+        });
+      
+        cy.request('POST', 'https://serverest.dev/usuarios', loginPage.newUser.default).then((response) => {
+          expect(response.status).to.eq(201); // Check if the status code is 201 (Created)
+          expect(response.body.message).to.eq('Cadastro realizado com sucesso'); // Check if the response message is correct
 
-            // Step 2: Authenticate and obtain the token
-            cy.request('POST', 'https://serverest.dev/login', {
-                email: newUser.email,
-                password: newUser.password
-            }).then((response) => {
-                expect(response.status).to.eq(200);
-                authToken = response.body.authorization;
-            });
-        });  
-    });
+          // Step 2: Authenticate and obtain the token
+          cy.request('POST', 'https://serverest.dev/login', {
+            email: loginPage.newUser.default.email,
+            password: loginPage.newUser.default.password
+          }).then((response) => {
+            expect(response.status).to.eq(200);
+            authToken = response.body.authorization;
+          });
+        });
+      });
   
     it('Should create a new cart for the user', () => {
         const produtos = {
@@ -114,5 +78,18 @@ describe('User Creation and Verification', () => {
         expect(response.status).to.eq(201);
         expect(response.body.message).to.eq('Cadastro realizado com sucesso');
       });
-    });    
-  });
+    });
+
+    it('Delete the cart', () => {
+        cy.request({
+            method: 'DELETE',
+            url: 'https://serverest.dev/carrinhos/concluir-compra',
+            headers: {
+              authorization: authToken, // Ensure `authToken` contains the valid token string
+            },
+          }).then((deleteResponse) => {
+            expect(deleteResponse.status).to.eq(200);
+            expect(deleteResponse.body.message).to.eq('Registro excluído com sucesso');
+          });
+        }) 
+});

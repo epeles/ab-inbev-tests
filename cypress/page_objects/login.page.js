@@ -15,12 +15,21 @@ class LoginTest {
         return cy.get('[role="alert"]'); 
     }
 
-    get defaultUser() {
+    get newUser() {
         return {
-            nome: 'Cypress Test',
-            email: `defaultUser1@example.com`,
-            password: 'password123',
-            administrador: 'false'
+            default: {
+                nome: 'Cypress Test',
+                email: `defaultUser2@example.com`,
+                password: 'password123',
+                administrador: 'false'
+            },
+            new: {
+                nome: 'Cypress Test',
+                email: `cypress.test${Date.now()}@example.com`,
+                password: 'password123',
+                administrador: 'true'
+                
+            }
         };
     }
 
