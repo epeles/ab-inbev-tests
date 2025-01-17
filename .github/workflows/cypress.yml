@@ -31,7 +31,6 @@ jobs:
       - name: Run Cypress Tests
         run: |
           npx cypress run \
-
             --browser ${{ matrix.browser }} 
 
       - name: Upload test results
