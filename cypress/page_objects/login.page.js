@@ -15,7 +15,7 @@ class LoginTest {
         return cy.get('[role="alert"]'); 
     }
 
-    get newUser() {
+    get user() {
         return {
             default: {
                 nome: 'Cypress Test',

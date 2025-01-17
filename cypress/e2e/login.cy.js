@@ -11,14 +11,14 @@ describe('Login Tests', () => {
 
   it('Should create a new user and confirm its creation', () => {
     // Check if the user already exists and delete if it does
-    cy.request('GET', `https://serverest.dev/usuarios?email=${loginPage.newUser.default.email}`).then((response) => {
+    cy.request('GET', `https://serverest.dev/usuarios?email=${loginPage.user.default.email}`).then((response) => {
       if (response.body.quantidade > 0) {
         cy.request('DELETE', `https://serverest.dev/usuarios/${response.body.usuarios[0]._id}`);
       }
     });
 
     // Step 1: Create a new user
-    cy.request('POST', 'https://serverest.dev/usuarios', loginPage.newUser.default).then((response) => {
+    cy.request('POST', 'https://serverest.dev/usuarios', loginPage.user.default).then((response) => {
       // Step 2: Validate the creation response
       expect(response.status).to.eq(201); // Check if the status code is 201 (Created)
       expect(response.body.message).to.eq('Cadastro realizado com sucesso'); // Check if the response message is correct
@@ -27,7 +27,7 @@ describe('Login Tests', () => {
   });
 
   it('should login with valid credentials', () => {
-    const { email, password } = loginPage.newUser.default;
+    const { email, password } = loginPage.user.default;
     loginPage.enterUsername(email); // Enter the username
     loginPage.enterPassword(password); // Enter the password
     loginPage.submit(); // Submit the login form
@@ -56,7 +56,7 @@ describe('Login Tests', () => {
       expect(response.statusCode).to.eq(400); // Check if the status code is 400 (Bad Request)
       expect(response.body.email).to.eq("email é obrigatório"); // Check if the response message is correct
     });
-    loginPage.getErrorMessage().should('be.visible')// Check if the error message is visible
+    loginPage.getErrorMessage().should('be.visible').and('have.css', 'background-color', 'rgb(243, 150, 154)')// Check if the error message is visible
   });
 });
 
