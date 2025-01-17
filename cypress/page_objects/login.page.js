@@ -12,7 +12,7 @@ class LoginTest {
     }
 
     getErrorMessage() {
-        return cy.get('[data-dismiss="alert"]'); 
+        return cy.get('[role="alert"]'); 
     }
 }
 

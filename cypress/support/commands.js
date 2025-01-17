@@ -1,3 +1,6 @@
+import LoginTest from "../page_objects/login.page";
+const loginPage = new LoginTest();
+
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
@@ -23,3 +26,11 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('login', (email, password) => {
+  cy.visit(Cypress.config('baseUrl'));
+  loginPage.enterUsername(email);
+  loginPage.enterPassword(password);
+  loginPage.submit();
+
+});
