@@ -14,6 +14,18 @@ class LoginTest {
     getErrorMessage() {
         return cy.get('[role="alert"]'); 
     }
+
+    get defaultUser() {
+        return {
+            nome: 'Cypress Test',
+            email: `defaultUser1@example.com`,
+            password: 'password123',
+            administrador: 'false'
+        };
+    }
+
+ 
 }
+
 
 export default LoginTest;

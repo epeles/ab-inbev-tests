@@ -10,6 +10,8 @@ describe('User Creation and Verification', () => {
       // Step 1: Create a new user
       cy.request('POST', 'https://serverest.dev/usuarios', newUser).then((response) => {
         // Step 2: Validate the creation response
+        console.log(newUser);
+        
         expect(response.status).to.eq(201);
         expect(response.body.message).to.eq('Cadastro realizado com sucesso');
         const userId = response.body._id;

@@ -6,11 +6,11 @@ const searchItem = new SearchItem();
 describe('Item Search Tests', () => {
   beforeEach(() => {
     cy.visit(Cypress.config('baseUrl'));
-    loginPage.enterUsername('epeles@ymail.com');
-    loginPage.enterPassword('12345678');
+    const { email, password } = loginPage.defaultUser
+    loginPage.enterUsername(email);
+    loginPage.enterPassword(password);
     loginPage.submit();
-    cy.intercept(`https://serverest.dev/produtos?nome=${searchItem.item()}`).as('productSearch');
-    
+    cy.intercept(`https://serverest.dev/produtos?nome=${searchItem.item()}`).as('productSearch');    
   });
 
   it('should search for an item and show results', () => {
@@ -21,7 +21,6 @@ describe('Item Search Tests', () => {
       expect(response.statusCode).to.eq(200);
       const quantity = response.body.quantidade;
       cy.get('.card-body').should('have.length', quantity);  
-
     });
   });
 
@@ -40,8 +39,5 @@ describe('Item Search Tests', () => {
     searchItem.increaseQuantity();
     searchItem.addToCartBtn();
     cy.url().should('include', '/carrinho');
-
   });
-
-
 });

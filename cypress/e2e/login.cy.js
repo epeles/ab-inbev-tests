@@ -7,9 +7,21 @@ describe('Login Tests', () => {
     cy.intercept('https://serverest.dev/login').as('login');
   });
 
+  // it('Should create a new user and confirm its creation', () => {
+  //   // Step 1: Create a new user
+  //   cy.request('POST', 'https://serverest.dev/usuarios', loginPage.defaultUser).then((response) => {
+  //     // Step 2: Validate the creation response
+     
+  //     expect(response.status).to.eq(201);
+  //     expect(response.body.message).to.eq('Cadastro realizado com sucesso');
+  //     const userId = response.body._id;
+  //   });
+  // });
+
   it('should login with valid credentials', () => {
-    loginPage.enterUsername('epeles@ymail.com');
-    loginPage.enterPassword('12345678');
+    const { email, password } = loginPage.defaultUser
+    loginPage.enterUsername(email);
+    loginPage.enterPassword(password);
     loginPage.submit();
     cy.wait('@login').then(({ response }) => {
       expect(response.statusCode).to.eq(200);
@@ -35,11 +47,8 @@ describe('Login Tests', () => {
     loginPage.enterPassword('invalidPassword');
     loginPage.submit();
     cy.wait('@login').then(({ response }) => {
-      expect(response.statusCode).to.eq(400);
-      console.log(response.body.email);
-      
+      expect(response.statusCode).to.eq(400);    
       expect(response.body.email).to.eq("email é obrigatório");
-      
     });
     loginPage.getErrorMessage().should('be.visible') 
   });
