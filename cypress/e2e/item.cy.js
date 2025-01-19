@@ -2,6 +2,7 @@ import SearchItem from "../page_objects/search.items"; // Import the SearchItem 
 import LoginTest from "../page_objects/login.page"; // Import the LoginTest page object for handling login actions
 const loginPage = new LoginTest(); // Create an instance of the LoginTest class
 const searchItem = new SearchItem(); // Create an instance of the SearchItem class
+let itemExists = false; // Variable to store whether the item exists in the list
 
 // Main test suite for Item Search Tests
 describe('Item Search Tests', () => {
@@ -13,6 +14,22 @@ describe('Item Search Tests', () => {
     loginPage.enterUsername(email); // Enter the username (email)
     loginPage.enterPassword(password); // Enter the password
     loginPage.submit(); // Submit the login form
+
+    //make sure the item exists on the list
+    cy.request('GET', 'https://serverest.dev/produtos') 
+    .then((response) => {
+      expect(response.status).to.eq(200); // Verify the response status is 200 (OK)
+      const produtos = response.body.produtos; // Access the array of products in the response
+      if (produtos.length > 0) {
+        itemExists = produtos.some((produto) => produto.nome.includes(searchItem.item())); // Check if any product contains the name from searchItem.item()
+        if (!itemExists) {
+          throw new Error(`No product with the name ${searchItem.item()} was found.`); // Throw an error if the item does not exist
+        }
+      } else {
+        throw new Error('The product list is empty.'); // Throw an error if the product list is empty
+      }
+    });
+
     cy.intercept(`https://serverest.dev/produtos?nome=${searchItem.item()}`).as('productSearch'); // Set up an intercept for the product search API
   });
 

@@ -15,10 +15,6 @@ class LoginTest {
         return cy.get('[role="alert"]'); 
     }
 
-    userId() {      
-        return response.body.usuarios[0]._id
-    }
-
     get user() {
         return {
             default: {
