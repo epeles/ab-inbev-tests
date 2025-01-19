@@ -71,7 +71,7 @@ This repository includes a GitHub Actions pipeline to run Cypress tests automati
 
 **Cypress Cloud Reports**
 
-After the pipeline execution on GitHub Actions, the test reports will be available on Cypress Cloud. You can access detailed test results, including screenshots and videos of the test runs, on your Cypress Dashboard.
+After the pipeline execution on GitHub Actions, the test reports will be available on Cypress Cloud. You can access detailed test results, including screenshots and videos of the test runs, on the Cypress Dashboard: https://cloud.cypress.io/projects/fvtch4/
 
 
 
