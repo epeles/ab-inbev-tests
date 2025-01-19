@@ -4,19 +4,19 @@ This repository contains automated tests for the serverest application, develope
 
 **Table of Contents**
 
-•[Overview](#overview)
+• [Overview](#overview)
 
-•[Prerequisites](#prerequisites)
+• [Prerequisites](#prerequisites)
 
-•[Installation](#installation)
+• [Installation](#installation)
 
-•[Running Tests](#running-tests)
+• [Running Tests](#running-tests)
 
-•[GitHub Actions Pipeline](#github-actions-pipeline)
+• [GitHub Actions Pipeline](#github-actions-pipeline)
 
-•[Cypress Cloud Reports](#cypress-cloud-reports)
+• [Cypress Cloud Reports](#cypress-cloud-reports)
 
-•[Test Cases](#test-cases)
+• [Test Cases](#test-cases)
 
 
 **Overview**
@@ -27,9 +27,9 @@ The serverest Automation Repository aims to ensure the reliability and robustnes
 
 Before running the tests, ensure you have the following installed:
 
-•[Node.js](https://nodejs.org/) (version 14 or higher)
+• [Node.js](https://nodejs.org/) (version 14 or higher)
 
-•[npm](https://www.npmjs.com/) (Node Package Manager)
+• [npm](https://www.npmjs.com/) (Node Package Manager)
 
 **Installation**
 
