@@ -73,7 +73,7 @@ This repository includes a GitHub Actions pipeline to run Cypress tests automati
 
 After the pipeline execution on GitHub Actions, the test reports will be available on Cypress Cloud. You can access detailed test results, including screenshots and videos of the test runs, on the Cypress Dashboard: https://cloud.cypress.io/projects/fvtch4/
 
-
+![Cypress Cloud](https://github.com/epeles/ab-inbev-tests/blob/main/assets/cypress-cloud-screenshot.png)
 
 **Test Cases**
 
