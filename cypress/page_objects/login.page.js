@@ -15,6 +15,10 @@ class LoginTest {
         return cy.get('[role="alert"]'); 
     }
 
+    userId() {      
+        return response.body.usuarios[0]._id
+    }
+
     get user() {
         return {
             default: {
@@ -25,7 +29,7 @@ class LoginTest {
             },
             new: {
                 nome: 'Cypress Test',
-                email: `cypress.test${Date.now()}@example.com`,
+                email: 'newUser_@example.com',
                 password: 'password123',
                 administrador: 'true'
                 

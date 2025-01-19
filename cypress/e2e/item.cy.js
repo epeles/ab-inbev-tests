@@ -41,8 +41,28 @@ describe('Item Search Tests', () => {
     searchItem.searchBtn(); // Click the search button
     searchItem.addToListBtn(); // Click the button to add the item to the list
     cy.url().should('include', '/minhaListaDeProdutos'); // Verify the URL includes the "my list of products" path
-    searchItem.increaseQuantity(); // Increase the quantity of the selected item
-    searchItem.addToCartBtn(); // Click the button to add the item to the cart
-    cy.url().should('include', '/carrinho'); // Verify the URL includes the "cart" path
-  });
+    cy.contains('Total: 1').should('be.visible');
+
+    it('should extract the price value and store it', () => {
+      cy.contains('Preço R$') // Locate the element that contains "Preço R$"
+        .invoke('text') // Get the complete text of the element
+        .then((text) => {
+          const number = text.match(/\d+/)[0]; // Extract only the number using regex
+          cy.wrap(number).as('priceValue'); // Store the number in a Cypress alias
+        });
+    });
+  
+    it('should increase the quantity and verify the total price', () => {
+      searchItem.increaseQuantity(); // Increase the quantity of the selected item
+      cy.contains('Total: 2').should('be.visible');
+      cy.get('@priceValue').then((priceValue) => {
+        cy.contains(priceValue * 2).should('be.visible'); // Verify the total price
+      });
+    });
+  
+    it('should add the item to the cart and verify the cart URL', () => {
+      searchItem.addToCartBtn(); // Click the button to add the item to the cart
+      cy.url().should('include', '/carrinho'); // Verify the URL includes the "cart" path
+    });
+  })     
 });
