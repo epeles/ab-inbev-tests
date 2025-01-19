@@ -58,4 +58,3 @@ describe('Login Tests', () => {
     loginPage.getErrorMessage().should('be.visible').and('have.css', 'background-color', 'rgb(243, 150, 154)')// Check if the error message is visible and the background color is correct
   });
 });
-

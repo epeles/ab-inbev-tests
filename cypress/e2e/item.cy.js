@@ -42,6 +42,7 @@ describe('Item Search Tests', () => {
     searchItem.addToListBtn(); // Click the button to add the item to the list
     cy.url().should('include', '/minhaListaDeProdutos'); // Verify the URL includes the "my list of products" path
     cy.contains('Total: 1').should('be.visible');
+    
 
     it('should extract the price value and store it', () => {
       cy.contains('Preço R$') // Locate the element that contains "Preço R$"

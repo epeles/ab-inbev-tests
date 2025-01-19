@@ -23,13 +23,13 @@ class LoginTest {
         return {
             default: {
                 nome: 'Cypress Test',
-                email: `defaultUser2@example.com`,
+                email: `defaultUser3@example.com`,
                 password: 'password123',
                 administrador: 'false'
             },
             new: {
                 nome: 'Cypress Test',
-                email: 'newUser_@example.com',
+                email: 'newUser_1@example.com',
                 password: 'password123',
                 administrador: 'true'
                 
