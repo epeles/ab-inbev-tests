@@ -8,7 +8,7 @@ class SearchItem {
     }
 
     item() {
-        return 'test';
+        return 'a';
     }
 
     addToListBtn() {

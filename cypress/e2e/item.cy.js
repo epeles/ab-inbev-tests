@@ -22,6 +22,7 @@ describe('Item Search Tests', () => {
       const produtos = response.body.produtos; // Access the array of products in the response
       if (produtos.length > 0) {
         itemExists = produtos.some((produto) => produto.nome.includes(searchItem.item())); // Check if any product contains the name from searchItem.item()
+        
         if (!itemExists) {
           throw new Error(`No product with the name ${searchItem.item()} was found.`); // Throw an error if the item does not exist
         }
