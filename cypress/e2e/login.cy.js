@@ -22,7 +22,6 @@ describe('Login Tests', () => {
       // Step 2: Validate the creation response
       expect(response.status).to.eq(201); // Check if the status code is 201 (Created)
       expect(response.body.message).to.eq('Cadastro realizado com sucesso'); // Check if the response message is correct
-      // const userId = response.body._id; // Store the user ID for further use
     });
   });
 
@@ -56,7 +55,7 @@ describe('Login Tests', () => {
       expect(response.statusCode).to.eq(400); // Check if the status code is 400 (Bad Request)
       expect(response.body.email).to.eq("email é obrigatório"); // Check if the response message is correct
     });
-    loginPage.getErrorMessage().should('be.visible').and('have.css', 'background-color', 'rgb(243, 150, 154)')// Check if the error message is visible
+    loginPage.getErrorMessage().should('be.visible').and('have.css', 'background-color', 'rgb(243, 150, 154)')// Check if the error message is visible and the background color is correct
   });
 });
 

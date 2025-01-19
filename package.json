@@ -8,7 +8,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "This repository contains automated tests for the serverest application, developed using Cypress and JavaScript. The tests are designed to validate the functionality and performance of various endpoints within the serverest API.",
   "dependencies": {
     "cypress": "^13.17.0"
   },
