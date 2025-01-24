@@ -6,9 +6,30 @@ let itemExists = false; // Variable to store whether the item exists in the list
 
 // Main test suite for Item Search Tests
 describe('Item Search Tests', () => {
-
+  let authToken; // Variable to store the authentication token
   // Hook to run before each test case in this suite
   beforeEach(() => {
+
+      // Step 1: Check if the default user exists and delete it
+      cy.request('GET', `https://serverest.dev/usuarios?email=${loginPage.user.default.email}`).then((response) => {
+        if (response.body.quantidade > 0) {
+          cy.request('DELETE', `https://serverest.dev/usuarios/${response.body.usuarios[0]._id}`);
+        }
+      });
+      // Step 2: Create a default user
+      cy.request('POST', 'https://serverest.dev/usuarios', loginPage.user.default).then((response) => {
+        expect(response.status).to.eq(201); // Verify the user creation status is 201
+        expect(response.body.message).to.eq('Cadastro realizado com sucesso'); // Confirm success message
+        // Step 3: Authenticate the user and retrieve the token
+        cy.request('POST', 'https://serverest.dev/login', {
+          email: loginPage.user.default.email,
+          password: loginPage.user.default.password
+        }).then((response) => {
+          expect(response.status).to.eq(200); // Verify successful authentication
+          authToken = response.body.authorization; // Store the authentication token
+        });
+      });
+
     cy.visit(Cypress.config('baseUrl')); // Navigate to the base URL defined in Cypress config
     const { email, password } = loginPage.user.default; // Retrieve default user credentials
     loginPage.enterUsername(email); // Enter the username (email)
