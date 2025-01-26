@@ -1,4 +1,4 @@
-import LoginTest from "../page_objects/login.page";
+import LoginTest from "../support/page_objects/login.page";
 
 describe('Login Tests', () => {
   const loginPage = new LoginTest();

@@ -1,5 +1,5 @@
-import SearchItem from "../page_objects/search.items";
-import LoginTest from "../page_objects/login.page";
+import SearchItem from "../support/page_objects/search.items";
+import LoginTest from "../support/page_objects/login.page";
 import { faker } from '@faker-js/faker';
 
 let constants; // Define constants at the top level
