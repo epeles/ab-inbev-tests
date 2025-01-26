@@ -1,108 +1,108 @@
-import SearchItem from "../page_objects/search.items"; // Import the SearchItem page object for interacting with search functionality
-import LoginTest from "../page_objects/login.page"; // Import the LoginTest page object for handling login actions
-const loginPage = new LoginTest(); // Create an instance of the LoginTest class
-const searchItem = new SearchItem(); // Create an instance of the SearchItem class
-let itemExists = false; // Variable to store whether the item exists in the list
+import SearchItem from "../page_objects/search.items";
+import LoginTest from "../page_objects/login.page";
 
-// Main test suite for Item Search Tests
 describe('Item Search Tests', () => {
-  let authToken; // Variable to store the authentication token
-  // Hook to run before each test case in this suite
-  beforeEach(() => {
+  const loginPage = new LoginTest();
+  const searchItem = new SearchItem();
+  let authToken;
+  let constants;
 
-      // Step 1: Check if the default user exists and delete it
-      cy.request('GET', `https://serverest.dev/usuarios?email=${loginPage.user.default.email}`).then((response) => {
+  before(() => {
+    cy.fixture('constants').then((data) => {
+      constants = data;
+    });
+  });
+
+  const setupUser = () => {
+    const { email, password } = loginPage.user.default;
+    
+    return cy.request('GET', `${constants.API.USERS}?email=${email}`)
+      .then((response) => {
         if (response.body.quantidade > 0) {
-          cy.request('DELETE', `https://serverest.dev/usuarios/${response.body.usuarios[0]._id}`);
+          return cy.request('DELETE', `${constants.API.USERS}/${response.body.usuarios[0]._id}`);
         }
+      })
+      .then(() => {
+        return cy.request('POST', constants.API.USERS, loginPage.user.default);
+      })
+      .then(() => {
+        return cy.request('POST', constants.API.LOGIN, { email, password });
+      })
+      .then((response) => {
+        authToken = response.body.authorization;
       });
-      // Step 2: Create a default user
-      cy.request('POST', 'https://serverest.dev/usuarios', loginPage.user.default).then((response) => {
-        expect(response.status).to.eq(201); // Verify the user creation status is 201
-        expect(response.body.message).to.eq('Cadastro realizado com sucesso'); // Confirm success message
-        // Step 3: Authenticate the user and retrieve the token
-        cy.request('POST', 'https://serverest.dev/login', {
-          email: loginPage.user.default.email,
-          password: loginPage.user.default.password
-        }).then((response) => {
-          expect(response.status).to.eq(200); // Verify successful authentication
-          authToken = response.body.authorization; // Store the authentication token
-        });
-      });
+  };
 
-    cy.visit(Cypress.config('baseUrl')); // Navigate to the base URL defined in Cypress config
-    const { email, password } = loginPage.user.default; // Retrieve default user credentials
-    loginPage.enterUsername(email); // Enter the username (email)
-    loginPage.enterPassword(password); // Enter the password
-    loginPage.submit(); // Submit the login form
-
-    //make sure the item exists on the list
-    cy.request('GET', 'https://serverest.dev/produtos') 
-    .then((response) => {
-      expect(response.status).to.eq(200); // Verify the response status is 200 (OK)
-      const produtos = response.body.produtos; // Access the array of products in the response
-      if (produtos.length > 0) {
-        itemExists = produtos.some((produto) => produto.nome.includes(searchItem.item())); // Check if any product contains the name from searchItem.item()
+  const verifyProductExists = () => {
+    return cy.request(constants.API.PRODUCTS)
+      .then((response) => {
+        expect(response.status).to.eq(200);
+        const produtos = response.body.produtos;
+        const itemExists = produtos.some((produto) => 
+          produto.nome.includes(searchItem.item())
+        );
         
         if (!itemExists) {
-          throw new Error(`No product with the name ${searchItem.item()} was found.`); // Throw an error if the item does not exist
+          throw new Error(`Product ${searchItem.item()} not found`);
         }
-      } else {
-        throw new Error('The product list is empty.'); // Throw an error if the product list is empty
-      }
-    });
+      });
+  };
 
-    cy.intercept(`https://serverest.dev/produtos?nome=${searchItem.item()}`).as('productSearch'); // Set up an intercept for the product search API
+  beforeEach(() => {
+    setupUser();
+    cy.visit(Cypress.config('baseUrl'));
+    const { email, password } = loginPage.user.default;
+    loginPage.enterUsername(email);
+    loginPage.enterPassword(password);
+    loginPage.submit();
+    verifyProductExists();
+    cy.intercept(`https://serverest.dev/produtos?nome=${searchItem.item()}`).as('productSearch');
   });
 
-  // Test case: Verify that searching for an item displays results
   it('should search for an item and show results', () => {
-    cy.get('input[placeholder="Pesquisar Produtos"]').should('exist'); // Verify the search input field exists
-    searchItem.enterItem(searchItem.item()); // Enter the item to search for
-    searchItem.searchBtn(); // Click the search button
-    cy.wait('@productSearch').then(({ response }) => { // Wait for the search API call to complete
-      expect(response.statusCode).to.eq(200); // Verify the response status code is 200 (OK)
-      const quantity = response.body.quantidade; // Retrieve the quantity of search results from the response
-      cy.get('.card-body').should('have.length', quantity); // Verify the number of result cards matches the quantity
+    cy.get('input[placeholder="Pesquisar Produtos"]').should('exist');
+    searchItem.enterItem(searchItem.item());
+    searchItem.searchBtn();
+    cy.wait('@productSearch').then(({ response }) => {
+      expect(response.statusCode).to.eq(200);
+      const quantity = response.body.quantidade;
+      cy.get('.card-body').should('have.length', quantity);
     });
   });
 
-  // Test case: Verify that searching for a non-existent item shows a "no results" message
   it('should show no results message', () => {
-    searchItem.enterItem('Produto inexistente'); // Enter a non-existent product name
-    searchItem.searchBtn(); // Click the search button
-    cy.contains('Nenhum produto foi encontrado').should('be.visible'); // Verify the "no results" message is visible
+    searchItem.enterItem('Produto inexistente');
+    searchItem.searchBtn();
+    cy.contains('Nenhum produto foi encontrado').should('be.visible');
   });
 
-  // Test case: Verify that an item can be added to the cart
   it('should add an item to the cart', () => {
-    searchItem.enterItem(searchItem.item()); // Enter the item to search for
-    searchItem.searchBtn(); // Click the search button
-    searchItem.addToListBtn(); // Click the button to add the item to the list
-    cy.url().should('include', '/minhaListaDeProdutos'); // Verify the URL includes the "my list of products" path
+    searchItem.enterItem(searchItem.item());
+    searchItem.searchBtn();
+    searchItem.addToListBtn();
+    cy.url().should('include', '/minhaListaDeProdutos');
     cy.contains('Total: 1').should('be.visible');
     
-
     it('should extract the price value and store it', () => {
-      cy.contains('Preço R$') // Locate the element that contains "Preço R$"
-        .invoke('text') // Get the complete text of the element
+      cy.contains('Preço R$')
+        .invoke('text')
         .then((text) => {
-          const number = text.match(/\d+/)[0]; // Extract only the number using regex
-          cy.wrap(number).as('priceValue'); // Store the number in a Cypress alias
+          const number = text.match(/\d+/)[0];
+          cy.wrap(number).as('priceValue');
         });
     });
   
     it('should increase the quantity and verify the total price', () => {
-      searchItem.increaseQuantity(); // Increase the quantity of the selected item
+      searchItem.increaseQuantity();
       cy.contains('Total: 2').should('be.visible');
       cy.get('@priceValue').then((priceValue) => {
-        cy.contains(priceValue * 2).should('be.visible'); // Verify the total price
+        cy.contains(priceValue * 2).should('be.visible');
       });
     });
   
     it('should add the item to the cart and verify the cart URL', () => {
-      searchItem.addToCartBtn(); // Click the button to add the item to the cart
-      cy.url().should('include', '/carrinho'); // Verify the URL includes the "cart" path
+      searchItem.addToCartBtn();
+      cy.url().should('include', '/carrinho');
     });
-  })     
+  });
 });

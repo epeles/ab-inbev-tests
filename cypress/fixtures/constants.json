@@ -1,0 +1,15 @@
+{
+  "API": {
+    "LOGIN": "https://serverest.dev/login",
+    "USERS": "https://serverest.dev/usuarios",
+    "CARTS": "https://serverest.dev/carrinhos",
+    "PRODUCTS": "https://serverest.dev/produtos"
+  },
+  "MESSAGES": {
+    "SUCCESS_LOGIN": "Login realizado com sucesso",
+    "SUCCESS_REGISTER": "Cadastro realizado com sucesso",
+    "INVALID_CREDENTIALS": "Email e/ou senha inválidos",
+    "REQUIRED_EMAIL": "email é obrigatório",
+    "SUCCESS_DELETE": "Registro excluído com sucesso"
+  }
+}

@@ -1,106 +1,101 @@
-import SearchItem from "../page_objects/search.items"; // Import the SearchItem page object for interacting with search functionality
-import LoginTest from "../page_objects/login.page"; // Import the LoginTest page object for handling login actions
-const loginPage = new LoginTest(); // Create an instance of the LoginTest class
-const searchItem = new SearchItem(); // Create an instance of the SearchItem class
-import { faker }
-from '@faker-js/faker'; // Import the Faker library to generate random data
+import SearchItem from "../page_objects/search.items";
+import LoginTest from "../page_objects/login.page";
+import { faker } from '@faker-js/faker';
 
-// Test suite for shopping cart functionality
-describe('Shopping Cart Tests', () => {
-  let authToken; // Variable to store the authentication token
-  before(() => {
-    // Step 1: Check if the default user exists and delete it
-    cy.request('GET', `https://serverest.dev/usuarios?email=${loginPage.user.default.email}`).then((response) => {
+let constants; // Define constants at the top level
+
+const generateProductData = () => ({
+  nome: faker.commerce.productName(),
+  descricao: faker.commerce.productDescription(),
+  preco: faker.number.int({ min: 100, max: 700 }),
+  quantidade: faker.number.int({ min: 10, max: 300 })
+});
+
+const createAuthenticatedUser = (user) => {
+  return cy.request('GET', `${constants.API.USERS}?email=${user.email}`)
+    .then((response) => {
       if (response.body.quantidade > 0) {
-        cy.request('DELETE', `https://serverest.dev/usuarios/${response.body.usuarios[0]._id}`);
+        return cy.request('DELETE', `${constants.API.USERS}/${response.body.usuarios[0]._id}`);
       }
-    });
-    // Step 2: Create a default user
-    cy.request('POST', 'https://serverest.dev/usuarios', loginPage.user.default).then((response) => {
-      expect(response.status).to.eq(201); // Verify the user creation status is 201
-      expect(response.body.message).to.eq('Cadastro realizado com sucesso'); // Confirm success message
-      // Step 3: Authenticate the user and retrieve the token
-      cy.request('POST', 'https://serverest.dev/login', {
-        email: loginPage.user.default.email,
-        password: loginPage.user.default.password
-      }).then((response) => {
-        expect(response.status).to.eq(200); // Verify successful authentication
-        authToken = response.body.authorization; // Store the authentication token
-      });
+    })
+    .then(() => cy.request('POST', constants.API.USERS, user))
+    .then(() => cy.request('POST', constants.API.LOGIN, {
+      email: user.email,
+      password: user.password
+    }))
+    .then((response) => response.body.authorization);
+};
+
+describe('Shopping Cart Tests', () => {
+  let authToken;
+  const loginPage = new LoginTest();
+  const searchItem = new SearchItem();
+
+  before(() => {
+    // Load constants first, then proceed with other operations
+    cy.fixture('constants').then((data) => {
+      constants = data;
+      // Only after constants are loaded, create the authenticated user
+      return createAuthenticatedUser(loginPage.user.default);
+    }).then((token) => {
+      authToken = token;
     });
   });
+
   it('Should create a new cart for the user', () => {
-    
-    // Create a cart with specified products
     cy.request({
       method: 'POST',
-      url: 'https://serverest.dev/carrinhos',
+      url: constants.API.CARTS,
       headers: {
         Authorization: authToken
       },
       body: searchItem.produtos
     }).then((response) => {
-      expect(response.status).to.eq(201); // Verify cart creation status is 201
-      expect(response.body.message).to.eq('Cadastro realizado com sucesso'); // Confirm success message
+      expect(response.status).to.eq(201);
+      expect(response.body.message).to.eq(constants.MESSAGES.SUCCESS_REGISTER);
     });
   });
+
   it('Delete the cart', () => {
     cy.request({
       method: 'DELETE',
-      url: 'https://serverest.dev/carrinhos/concluir-compra',
+      url: `${constants.API.CARTS}/concluir-compra`,
       headers: {
         Authorization: authToken
       }
     }).then((deleteResponse) => {
-      expect(deleteResponse.status).to.eq(200); // Verify successful deletion
-      expect(deleteResponse.body.message).to.eq('Registro excluído com sucesso'); // Confirm success message
+      expect(deleteResponse.status).to.eq(200);
+      expect(deleteResponse.body.message).to.eq('Registro excluído com sucesso');
     });
   });
 });
 
-// Test suite for product functionality
 describe('Product Test', () => {
   let token, produtoID, updatedItem;
+  const loginPage = new LoginTest();
   const { email, password } = loginPage.user.new;
-  const newItem = {
-    nome: faker.commerce.productName(),
-    descricao: faker.commerce.productDescription(),
-    preco: faker.number.int({ min: 100, max: 700 }),
-    quantidade: faker.number.int({ min: 10, max: 300 })
-  };
+  const newItem = generateProductData();
 
-  it('should check if the user exists and delete them', () => {
-    cy.request('GET', `https://serverest.dev/usuarios?email=${email}`).then((response) => {
-      if (response.body.quantidade > 0) {
-        cy.request('DELETE', `https://serverest.dev/usuarios/${response.body.usuarios[0]._id}`);
-      }
-    });
-  });
-
-  it('should create a new user', () => {
-    cy.request('POST', 'https://serverest.dev/usuarios', loginPage.user.new).then((response) => {
-      expect(response.status).to.eq(201); // Verify user creation
-    });
-  });
-
-  it('should authenticate and obtain token', () => {
-    cy.request('POST', 'https://serverest.dev/login', { email, password }).then((loginResponse) => {
-      expect(loginResponse.status).to.eq(200); // Verify login success
-      token = loginResponse.body.authorization; // Store authentication token
+  before(() => {
+    cy.fixture('constants').then((data) => {
+      constants = data;
+      return createAuthenticatedUser(loginPage.user.new);
+    }).then((authToken) => {
+      token = authToken;
     });
   });
 
   it('should register a new product', () => {
     cy.request({
       method: 'POST',
-      url: 'https://serverest.dev/produtos',
+      url: constants.API.PRODUCTS,
       headers: {
         Authorization: token
       },
       body: newItem
     }).then((produtoResponse) => {
-      expect(produtoResponse.status).to.eq(201); // Verify product registration
-      produtoID = produtoResponse.body._id; // Store product ID
+      expect(produtoResponse.status).to.eq(201);
+      produtoID = produtoResponse.body._id;
     });
   });
 
@@ -108,18 +103,18 @@ describe('Product Test', () => {
     updatedItem = { ...newItem, preco: faker.number.int({ min: 100, max: 700 }) };
     cy.request({
       method: 'PUT',
-      url: `https://serverest.dev/produtos/${produtoID}`,
+      url: `${constants.API.PRODUCTS}/${produtoID}`,
       headers: {
         Authorization: token
       },
       body: updatedItem
     }).then((updateResponse) => {
-      expect(updateResponse.status).to.eq(200); // Verify successful update
+      expect(updateResponse.status).to.eq(200);
     });
   });
 
   it('should verify the product was edited', () => {
-    cy.request('GET', `https://serverest.dev/produtos/${produtoID}`).then((getProdutoResponse) => {
+    cy.request('GET', `${constants.API.PRODUCTS}/${produtoID}`).then((getProdutoResponse) => {
       const { nome, preco, descricao, quantidade } = getProdutoResponse.body;
       expect(nome).to.eq(updatedItem.nome);
       expect(preco).to.eq(updatedItem.preco);
@@ -129,8 +124,8 @@ describe('Product Test', () => {
   });
 
   it('should delete the user', () => {
-    cy.request('GET', `https://serverest.dev/usuarios?email=${email}`).then((response) => {
-      cy.request('DELETE', `https://serverest.dev/usuarios/${response.body.usuarios[0]._id}`);
+    cy.request('GET', `${constants.API.USERS}?email=${email}`).then((response) => {
+      cy.request('DELETE', `${constants.API.USERS}/${response.body.usuarios[0]._id}`);
     });
   });
 });
