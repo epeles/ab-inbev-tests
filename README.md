@@ -36,11 +36,11 @@ Before running the tests, ensure you have the following installed:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/epeles/ab-inbev-tests.git
+git clone https://github.com/epeles/serverest-tests.git
 ```
 
 ```bash
-cd ab-inbev-tests
+cd serverest-tests
 ```
 
 2. Install the necessary dependencies:
